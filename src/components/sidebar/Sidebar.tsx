@@ -9,6 +9,7 @@ const menuItems = [
 	{ path: "/dashboard/main", icon: <IoBrowsersSharp size={40} />, title: "Dashboard", subtitle: "Visualizacion" },
 	{ path: "/dashboard/counter", icon: <IoCalculator size={40} />, title: "Counter", subtitle: "Contador" },
 	{ path: "/dashboard/pokemons", icon: <IoBaseballOutline size={40} />, title: "Pokemons", subtitle: "pokemones" },
+	{ path: "/dashboard/favorites", icon: <IoBaseballOutline size={40} />, title: "Favorites", subtitle: "pokemons favoritos" },
 ];
 
 export const Sidebar = () => {

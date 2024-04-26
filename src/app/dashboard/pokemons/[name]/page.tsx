@@ -1,5 +1,5 @@
-import { Pokemon } from "@/app/interfaces/pokemon/pokemon";
-import { PokemonResponse } from "@/app/interfaces/pokemon/pokemon-response";
+import { Pokemon } from "@/interfaces/pokemon/pokemon";
+import { PokemonResponse } from "@/interfaces/pokemon/pokemon-response";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -8,8 +8,9 @@ interface Props {
 	params: { name: string };
 }
 
+//! En build time
 export async function generateStaticParams() {
-	const data: PokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=151&offset=0`).then((res) => res.json());
+	const data: PokemonResponse = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
 
 	const static151Pokemons = data.results.map((pokemon) => ({
 		name: pokemon.name,
@@ -22,34 +23,41 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	try {
-		const { id, name } = await getPokemons(params.name);
+		const { id, name } = await getPokemon(params.name);
 
 		return {
-			title: `#${id} - ${name.toUpperCase()}`,
-			description: "Pagina de pokemones",
+			title: `#${id} - ${name}`,
+			description: `Página del pokémon ${name}`,
 		};
 	} catch (error) {
 		return {
-			title: "Pagina de pokemon",
-			description: "Irure sunt magna et in qui.",
+			title: "Página del pokémon",
+			description: "Culpa cupidatat ipsum magna reprehenderit ex tempor sint ad minim reprehenderit consequat sit.",
 		};
 	}
 }
 
-const getPokemons = async (name: string): Promise<Pokemon> => {
+const getPokemon = async (name: string): Promise<Pokemon> => {
 	try {
-		const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, { cache: "force-cache" }).then((res) => res.json());
+		const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+			// cache: 'force-cache',// TODO: cambiar esto en un futuro
+			next: {
+				revalidate: 60 * 60 * 30 * 6,
+			},
+		}).then((resp) => resp.json());
 
-		console.log("se cargo el pokemon", pokemon.name);
+		console.log("Se cargó: ", pokemon.name);
 
 		return pokemon;
 	} catch (error) {
-		return notFound();
+		notFound();
 	}
 };
 
 export default async function PokemonPage({ params }: Props) {
-	const pokemon = await getPokemons(params.name);
+	const pokemon = await getPokemon(params.name);
+
+	//console.log({ pokemon });
 
 	return (
 		<div className="flex mt-5 flex-col items-center text-slate-800">
